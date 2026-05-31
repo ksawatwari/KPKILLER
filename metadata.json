@@ -1,0 +1,6 @@
+{
+  "name": "ENG KP Killer Landing Page",
+  "description": "ติวอังกฤษ ก.พ. แบบเพื่อนบอกเพื่อน อ่านง่าย จบไว ผ่านจริง",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
