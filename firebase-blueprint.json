@@ -1,0 +1,59 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user profile in the application.",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "User's email address."
+        },
+        "role": {
+          "type": "string",
+          "description": "User's role, e.g., 'user' or 'admin'",
+          "enum": ["user", "admin"]
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the user account was created."
+        }
+      },
+      "required": ["email", "role", "createdAt"]
+    },
+    "ExamResult": {
+      "title": "Exam Result",
+      "description": "A record of an exam attempt by a user.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "ID of the user who took the exam."
+        },
+        "score": {
+          "type": "number",
+          "description": "Score achieved in the exam."
+        },
+        "total": {
+          "type": "number",
+          "description": "Total possible score."
+        },
+        "date": {
+          "type": "string",
+          "description": "Timestamp when the exam was taken."
+        }
+      },
+      "required": ["userId", "score", "total", "date"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "User profiles. Sensitive information should be stored securely."
+    },
+    "examResults/{resultId}": {
+      "schema": "ExamResult",
+      "description": "Exam results tracking progress of users."
+    }
+  }
+}
