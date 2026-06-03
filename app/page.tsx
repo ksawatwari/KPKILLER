@@ -25,16 +25,24 @@ export default function HomePage() {
   const [showBackToTop, setShowBackToTop] = useState(false);
 
   useEffect(() => {
+    let scrollTimeout: NodeJS.Timeout;
     const handleScroll = () => {
-      if (window.scrollY > 300) {
-        setShowBackToTop(true);
-      } else {
-        setShowBackToTop(false);
-      }
+      if (scrollTimeout) return;
+      scrollTimeout = setTimeout(() => {
+        if (window.scrollY > 300) {
+          setShowBackToTop((prev) => (prev ? prev : true));
+        } else {
+          setShowBackToTop((prev) => (!prev ? prev : false));
+        }
+        scrollTimeout = undefined as any;
+      }, 50);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeout) clearTimeout(scrollTimeout);
+    };
   }, []);
 
   const scrollToTop = () => {
