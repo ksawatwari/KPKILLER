@@ -687,6 +687,7 @@ const SettingsTab = ({ showToast }: any) => {
             <label className="block border-2 border-dashed border-gray-300 p-6 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:border-[#C9A84C] hover:text-[#C9A84C] cursor-pointer relative overflow-hidden group h-[200px]">
               {settings.qrCodeImg ? (
                 <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={settings.qrCodeImg} alt="QR Code" className="h-full object-contain" />
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white z-10">
                     <Plus className="w-8 h-8 mb-2" />
