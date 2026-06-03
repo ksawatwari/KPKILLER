@@ -1,0 +1,71 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Primitives
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+    
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isSignedIn() { return request.auth != null && request.auth.token.email_verified == true; }
+    
+    // User Entities
+    function isValidUser(data) {
+      return data.keys().hasAll(['email', 'role', 'createdAt'])
+        && data.keys().size() == 3
+        && data.email is string && data.email.size() <= 256
+        && data.role in ['user', 'admin']
+        && (data.createdAt is timestamp || data.createdAt is string); // Handling potential string timestamps if app isn't using native timestamp
+    }
+
+    match /users/{userId} {
+      allow get: if isSignedIn() && (request.auth.uid == userId);
+      allow list: if isSignedIn() && resource.data.id == request.auth.uid; // Only list own user doc (practically useless but secure)
+      
+      allow create: if isSignedIn() 
+        && isValidId(userId)
+        && request.auth.uid == userId
+        && isValidUser(incoming())
+        && incoming().role == 'user' // Default to user on creation
+        && incoming().email == request.auth.token.email;
+        
+      allow update: if isSignedIn()
+        && request.auth.uid == userId
+        && isValidUser(incoming())
+        && incoming().diff(existing()).affectedKeys().hasOnly([]) // Forbid user updates for now unless specified
+        && incoming().role == existing().role
+        && incoming().email == existing().email
+        && incoming().createdAt == existing().createdAt;
+    }
+
+    function isValidExamResult(data) {
+      return data.keys().hasAll(['userId', 'score', 'total', 'date'])
+        && data.keys().size() == 4
+        && data.userId is string && data.userId.size() <= 128
+        && data.score is number && data.score >= 0
+        && data.total is number && data.total > 0
+        && (data.date is timestamp || data.date is string);
+    }
+
+    match /examResults/{resultId} {
+      allow get: if isSignedIn() && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      
+      allow create: if isSignedIn()
+        && isValidId(resultId)
+        && isValidExamResult(incoming())
+        && incoming().userId == request.auth.uid
+        && exists(/databases/$(database)/documents/users/$(incoming().userId));
+        
+      allow update: if false; // Exam results should be immutable once created
+      allow delete: if false;
+    }
+  }
+}
